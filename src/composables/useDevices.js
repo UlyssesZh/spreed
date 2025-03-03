@@ -10,7 +10,7 @@ import { useSoundsStore } from '../stores/sounds.js'
 import attachMediaStream from '../utils/attachmediastream.js'
 import TrackToStream from '../utils/media/pipeline/TrackToStream.js'
 import VirtualBackground from '../utils/media/pipeline/VirtualBackground.js'
-import { mediaDevicesManager as mediaDevicesManagerInstance } from '../utils/webrtc/index.js'
+import { callParticipantsAudioPlayer, mediaDevicesManager as mediaDevicesManagerInstance } from '../utils/webrtc/index.js'
 
 /**
  * Check whether the user joined the call of the current token in this PHP session or not
@@ -110,6 +110,9 @@ export function useDevices(video, initializeOnMounted) {
 	watch(audioOutputId, (deviceId) => {
 		if (initialized) {
 			soundsStore.setGeneralAudioOutput(deviceId)
+			if (callParticipantsAudioPlayer) {
+				callParticipantsAudioPlayer.setGeneralAudioOutput(deviceId)
+			}
 		}
 	})
 
