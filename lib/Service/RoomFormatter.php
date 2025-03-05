@@ -13,7 +13,6 @@ use OCA\Talk\Config;
 use OCA\Talk\Federation\Proxy\TalkV1\UserConverter;
 use OCA\Talk\Model\Attendee;
 use OCA\Talk\Model\BreakoutRoom;
-use OCA\Talk\Model\RoomEventMapper;
 use OCA\Talk\Model\Session;
 use OCA\Talk\Participant;
 use OCA\Talk\ResponseDefinitions;
@@ -52,7 +51,6 @@ class RoomFormatter {
 		protected UserConverter $userConverter,
 		protected IL10N $l10n,
 		protected ?string $userId,
-		protected RoomEventMapper $roomEventMapper,
 	) {
 	}
 
@@ -422,16 +420,6 @@ class RoomFormatter {
 		if ($room->isFederatedConversation()) {
 			$roomData['attendeeId'] = (int)$attendee->getRemoteId();
 			$roomData['canLeaveConversation'] = true;
-		}
-		if ($room->getType() === Room::OBJECT_TYPE_EVENT) {
-			// Should we make this a configurable interval per user?
-			$start = $this->timeFactory->getTime() + 300;
-			try {
-				$roomData['event'] = $this->roomEventMapper->findNextForRoom($room->getToken(), $start);
-			} catch (DoesNotExistException) {
-				// No current events for this room
-				$roomData['event'] = null;
-			}
 		}
 
 		return $roomData;

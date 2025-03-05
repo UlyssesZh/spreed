@@ -1429,4 +1429,16 @@ class RoomService {
 			throw new TypeException(TypeException::REASON_BREAKOUT_ROOM);
 		}
 	}
+
+	public function resetObject(Room $room): void {
+		$update = $this->db->getQueryBuilder();
+		$update->update('talk_rooms')
+			->set('object_type', $update->createNamedParameter('', IQueryBuilder::PARAM_STR))
+			->set('object_id', $update->createNamedParameter('', IQueryBuilder::PARAM_STR))
+			->where($update->expr()->eq('id', $update->createNamedParameter($room->getId(), IQueryBuilder::PARAM_INT)));
+		$update->executeStatement();
+
+		$room->setObjectId('');
+		$room->setObjectType('');
+	}
 }
