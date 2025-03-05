@@ -9,20 +9,20 @@ const ONE_DAY_IN_MS = 86400000
 
 const locale = getCanonicalLocale()
 const absoluteTimeFormat = {
-	LT: new Intl.DateTimeFormat(locale, { hour: 'numeric', minute: 'numeric' }),
-	LTS: new Intl.DateTimeFormat(locale, { hour: 'numeric', minute: 'numeric', second: 'numeric' }),
-	L: new Intl.DateTimeFormat(locale, { year: 'numeric', month: '2-digit', day: '2-digit' }),
-	l: new Intl.DateTimeFormat(locale, { year: 'numeric', month: 'numeric', day: 'numeric' }),
-	LL: new Intl.DateTimeFormat(locale, { year: 'numeric', month: 'long', day: 'numeric' }),
-	ll: new Intl.DateTimeFormat(locale, { year: 'numeric', month: 'short', day: 'numeric' }),
-	LLL: new Intl.DateTimeFormat(locale, { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric' }),
-	lll: new Intl.DateTimeFormat(locale, { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric' }),
-	LLLL: new Intl.DateTimeFormat(locale, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric' }),
-	llll: new Intl.DateTimeFormat(locale, { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric' }),
-	ddd: new Intl.DateTimeFormat(locale, { weekday: 'short' }),
-	dddd: new Intl.DateTimeFormat(locale, { weekday: 'long' }),
-	MMM: new Intl.DateTimeFormat(locale, { month: 'short' }),
-	MMMM: new Intl.DateTimeFormat(locale, { month: 'long' }),
+	LT: new Intl.DateTimeFormat(locale, { hour: 'numeric', minute: 'numeric' }), // '8:30 PM'
+	LTS: new Intl.DateTimeFormat(locale, { hour: 'numeric', minute: 'numeric', second: 'numeric' }), // '8:30:00 PM'
+	L: new Intl.DateTimeFormat(locale, { year: 'numeric', month: '2-digit', day: '2-digit' }), // '02/15/2025'
+	l: new Intl.DateTimeFormat(locale, { year: 'numeric', month: 'numeric', day: 'numeric' }), // '2/15/2025'
+	LL: new Intl.DateTimeFormat(locale, { year: 'numeric', month: 'long', day: 'numeric' }), // 'February 15, 2025'
+	ll: new Intl.DateTimeFormat(locale, { year: 'numeric', month: 'short', day: 'numeric' }), // 'Feb 15, 2025'
+	LLL: new Intl.DateTimeFormat(locale, { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric' }), // 'February 15, 2025 at 8:30 PM'
+	lll: new Intl.DateTimeFormat(locale, { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric' }), // 'Feb 15, 2025, 8:30 PM'
+	LLLL: new Intl.DateTimeFormat(locale, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric' }), // 'Saturday, February 15, 2025 at 8:30 PM'
+	llll: new Intl.DateTimeFormat(locale, { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric' }), // 'Sat, Feb 15, 2025, 8:30 PM'
+	ddd: new Intl.DateTimeFormat(locale, { weekday: 'short' }), // 'Sat'
+	dddd: new Intl.DateTimeFormat(locale, { weekday: 'long' }), // 'Saturday'
+	MMM: new Intl.DateTimeFormat(locale, { month: 'short' }), // 'Feb'
+	MMMM: new Intl.DateTimeFormat(locale, { month: 'long' }), // 'February'
 } as const
 const availableFormats = Object.keys(absoluteTimeFormat) as Array<keyof typeof absoluteTimeFormat>
 
