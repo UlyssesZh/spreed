@@ -5,6 +5,7 @@
 import {
 	convertToUnix,
 	formatDateTime,
+	formatRelativeTime,
 	formattedTime,
 	futureRelativeTime,
 } from '../formattedTime.ts'
@@ -92,5 +93,35 @@ describe('formatDateTime', () => {
 	it.each(LOCALIZED_TEST_CASES)('should return datetime with specified format %s', (format, output) => {
 		const result = formatDateTime(TIME, format)
 		expect(result).toBe(output)
+	})
+})
+
+
+describe('formatRelativeTime', () => {
+	const TIME = new Date('2025-02-15T20:30:00Z')
+
+	const RELATIVE_TEST_CASES = [
+		['-7', new Date('2025-02-08T20:30:00Z'), 'February 8, 2025', 'February 8, 2025'],
+		['-6', new Date('2025-02-09T20:30:00Z'), '6 days ago, February 9, 2025', 'Sunday, 8:30 PM'],
+		['-5', new Date('2025-02-10T20:30:00Z'), '5 days ago, February 10, 2025', 'Monday, 8:30 PM'],
+		['-4', new Date('2025-02-11T20:30:00Z'), '4 days ago, February 11, 2025', 'Tuesday, 8:30 PM'],
+		['-3', new Date('2025-02-12T20:30:00Z'), '3 days ago, February 12, 2025', 'Wednesday, 8:30 PM'],
+		['-2', new Date('2025-02-13T20:30:00Z'), '2 days ago, February 13, 2025', 'Thursday, 8:30 PM'],
+		['-1', new Date('2025-02-14T20:30:00Z'), 'yesterday, February 14, 2025', 'yesterday, 8:30 PM'],
+		['0', new Date('2025-02-15T20:30:00Z'), 'today, February 15, 2025', 'today, 8:30 PM'],
+		['1', new Date('2025-02-16T20:30:00Z'), 'tomorrow, February 16, 2025', 'tomorrow, 8:30 PM'],
+		['2', new Date('2025-02-17T20:30:00Z'), 'in 2 days, February 17, 2025', 'Monday, 8:30 PM'],
+		['3', new Date('2025-02-18T20:30:00Z'), 'in 3 days, February 18, 2025', 'Tuesday, 8:30 PM'],
+		['4', new Date('2025-02-19T20:30:00Z'), 'in 4 days, February 19, 2025', 'Wednesday, 8:30 PM'],
+		['5', new Date('2025-02-20T20:30:00Z'), 'in 5 days, February 20, 2025', 'Thursday, 8:30 PM'],
+		['6', new Date('2025-02-21T20:30:00Z'), 'in 6 days, February 21, 2025', 'Friday, 8:30 PM'],
+		['7', new Date('2025-02-22T20:30:00Z'), 'February 22, 2025', 'February 22, 2025'],
+	]
+
+	it.each(RELATIVE_TEST_CASES)('should return datetime with specified format %s days from the base', (diffDays, time, numericOutput, weekdayOutput) => {
+		const numericResult = formatRelativeTime(+time, { from: TIME, weekPrefix: 'numeric', weekSuffix: 'LL' })
+		const weekdayResult = formatRelativeTime(+time, { from: TIME, weekPrefix: 'weekday', weekSuffix: 'LT' })
+		expect(numericResult).toBe(numericOutput)
+		expect(weekdayResult).toBe(weekdayOutput)
 	})
 })
