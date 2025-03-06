@@ -125,7 +125,6 @@ function formatDateTime(time: Date | number, format: string): string {
 		.replace('ss', dateTime.getSeconds().toString().padStart(2, '0'))
 }
 
-
 type FormatRelativeOptions = {
 	from?: number,
 	weekPrefix?: 'weekday' | 'numeric',
@@ -140,11 +139,12 @@ type FormatRelativeOptions = {
  * - absoluteDate: any requested absolute format
  * @see {@link formatDateTime}
  * @param time event start time in ms
- * @param from timestamp to count from in ms (current time by default)
- * @param weekPrefix appearance of prefix: 'weekday' - Monday | 'numeric' - in 3 days (default)
- * @param weekSuffix appearance of suffix for timestamps < 7 days (LT by default)
- * @param suffix appearance of suffix for timestamps >= 7 days (LL by default)
- * @param omitSameYear omit year part if date to count from has the same year
+ * @param options relative time formatting options
+ * @param options.from timestamp to count from in ms (current time by default)
+ * @param options.weekPrefix appearance of prefix: 'weekday' - Monday | 'numeric' - in 3 days (default)
+ * @param options.weekSuffix appearance of suffix for timestamps < 7 days (LT by default)
+ * @param options.suffix appearance of suffix for timestamps >= 7 days (LL by default)
+ * @param options.omitSameYear omit year part if date to count from has the same year
  */
 function formatRelativeTime(time: number, { from = Date.now(), weekPrefix = 'numeric', weekSuffix = 'LT', suffix = 'LL', omitSameYear = false }: FormatRelativeOptions = {}) {
 	const daysDiff = Math.floor((new Date(time).setHours(0, 0, 0, 0) - new Date(from).setHours(0, 0, 0, 0)) / ONE_DAY_IN_MS)
@@ -156,32 +156,32 @@ function formatRelativeTime(time: number, { from = Date.now(), weekPrefix = 'num
 	}
 
 	switch (daysDiff) {
-		case -1:
-		case 0:
-		case 1:
-			// TRANSLATORS: <yesterday, March 18th, 2024> or <in 3 days, 4:30 PM>
-			return t('spreed', '{relativeDate}, {absoluteDate}', {
-				relativeDate: relativeTimeFormat.auto.format(daysDiff, 'day'),
-				absoluteDate: formatDateTime(time, weekSuffix),
-			}, undefined, { escape: false })
-		case -6:
-		case -5:
-		case -4:
-		case -3:
-		case -2:
-		case 2:
-		case 3:
-		case 4:
-		case 5:
-		case 6:
-			return t('spreed', '{relativeDate}, {absoluteDate}', {
-				relativeDate: weekPrefix === 'weekday'
-					? formatDateTime(time, 'dddd')
-					: relativeTimeFormat.numeric.format(daysDiff, 'day'),
-				absoluteDate: formatDateTime(time, weekSuffix),
-			}, undefined, { escape: false })
-		default:
-			return formatDateTime(time, suffix)
+	case -1:
+	case 0:
+	case 1:
+		// TRANSLATORS: <yesterday, March 18th, 2024> or <in 3 days, 4:30 PM>
+		return t('spreed', '{relativeDate}, {absoluteDate}', {
+			relativeDate: relativeTimeFormat.auto.format(daysDiff, 'day'),
+			absoluteDate: formatDateTime(time, weekSuffix),
+		}, undefined, { escape: false })
+	case -6:
+	case -5:
+	case -4:
+	case -3:
+	case -2:
+	case 2:
+	case 3:
+	case 4:
+	case 5:
+	case 6:
+		return t('spreed', '{relativeDate}, {absoluteDate}', {
+			relativeDate: weekPrefix === 'weekday'
+				? formatDateTime(time, 'dddd')
+				: relativeTimeFormat.numeric.format(daysDiff, 'day'),
+			absoluteDate: formatDateTime(time, weekSuffix),
+		}, undefined, { escape: false })
+	default:
+		return formatDateTime(time, suffix)
 	}
 }
 

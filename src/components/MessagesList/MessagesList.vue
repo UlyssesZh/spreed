@@ -1348,6 +1348,10 @@ export default {
 		color: var(--color-text-maxcontrast);
 		background-color: var(--color-background-dark);
 		border-radius: var(--border-radius-element, var(--border-radius-pill));
+
+		&::first-letter {
+			text-transform: capitalize;
+		}
 	}
 
 	&:last-child {

@@ -39,7 +39,7 @@ import { ATTENDEE } from '../constants.ts'
 import { hasTalkFeature } from '../services/CapabilitiesManager.ts'
 import { useGroupwareStore } from '../stores/groupware.ts'
 import type { Conversation, Participant } from '../types/index.ts'
-import {convertToUnix, formatRelativeTime } from '../utils/formattedTime.ts'
+import { convertToUnix, formatRelativeTime } from '../utils/formattedTime.ts'
 import { getDisplayNameWithFallback } from '../utils/getDisplayName.ts'
 
 const props = defineProps<{
@@ -71,7 +71,7 @@ const upcomingEvents = computed(() => {
 		.map(event => {
 			const start = (!event.start || event.start * 1000 <= Date.now())
 				? t('spreed', 'Now')
-				: formatRelativeTime(event.start * 1000, { weekPrefix: 'weekday', weekSuffix: 'LT' })
+				: formatRelativeTime(event.start * 1000, { weekPrefix: 'weekday', weekSuffix: 'LT', omitSameYear: true })
 
 			const color = calendars.value[event.calendarUri]?.color ?? usernameToColor(event.calendarUri).color
 
@@ -314,7 +314,9 @@ async function submitNewMeeting() {
 						<span class="upcoming-meeting__header">
 							{{ t('spreed', 'Next meeting') }}
 						</span>
-						<span> {{ upcomingEvents[0].start }} </span>
+						<span class="upcoming-meeting__datetime">
+							{{ upcomingEvents[0].start }}
+						</span>
 					</template>
 				</NcButton>
 			</template>
@@ -335,7 +337,9 @@ async function submitNewMeeting() {
 										<span class="calendar-events__header-text">{{ event.summary }}</span>
 										<IconReload v-if="event.recurrenceId" :size="13" />
 									</span>
-									<span>{{ event.start }}</span>
+									<span class="calendar-events__datetime">
+										{{ event.start }}
+									</span>
 								</span>
 							</a>
 						</li>
@@ -558,6 +562,12 @@ async function submitNewMeeting() {
 	&__buttons {
 		padding: var(--default-grid-baseline);
 	}
+
+	&__datetime {
+		&::first-letter {
+			text-transform: capitalize;
+		}
+	}
 }
 
 .calendar-meeting {
@@ -643,6 +653,12 @@ async function submitNewMeeting() {
 
 	&__header {
 		font-weight: 500;
+	}
+
+	&__datetime {
+		&::first-letter {
+			text-transform: capitalize;
+		}
 	}
 }
 
