@@ -8,6 +8,7 @@ declare(strict_types=1);
  */
 namespace OCA\Talk\Listener;
 
+use OCA\DAV\CalDAV\TimezoneService;
 use OCA\DAV\Events\CalendarObjectCreatedEvent;
 use OCA\DAV\Events\CalendarObjectUpdatedEvent;
 use OCA\Talk\Exceptions\RoomNotFoundException;
@@ -16,18 +17,22 @@ use OCA\Talk\Room;
 use OCA\Talk\Service\RoomService;
 use OCP\EventDispatcher\Event;
 use OCP\EventDispatcher\IEventListener;
-use OCP\IUser;
+use OCP\IUserManager;
 use Psr\Log\LoggerInterface;
+use Sabre\VObject\Property\ICalendar\Date;
+use Sabre\VObject\Property\ICalendar\DateTime;
 use Sabre\VObject\Reader;
 
 /** @template-implements IEventListener<CalendarObjectCreatedEvent|CalendarObjectUpdatedEvent> */
 class CalDavEventListener implements IEventListener {
 
 	public function __construct(
-		protected Manager $manager,
-		protected RoomService $roomService,
-		protected IUser $user,
-		protected LoggerInterface $logger,
+		private Manager $manager,
+		private RoomService $roomService,
+		private LoggerInterface $logger,
+		private IUserManager $userManager,
+		private TimezoneService $timezoneService,
+		private string $userId,
 	) {
 
 	}
@@ -43,6 +48,7 @@ class CalDavEventListener implements IEventListener {
 		}
 
 		if (!str_contains($calData, 'LOCATION:')) {
+			$this->logger->debug('No location for the even, skipping.');
 			return;
 		}
 
@@ -51,36 +57,52 @@ class CalDavEventListener implements IEventListener {
 		// Check if the location is set and if the location string contains a call url
 		$location = $vevent->LOCATION->getValue();
 		if ($location === null || !str_contains($location, '/call/')) {
+			$this->logger->debug('No location for the event or event is not call link, skipping.');
 			return;
 		}
 
 		// Check if room exists and check if user is part of room
 		$roomToken = array_reverse(explode('/', $location))[0];
 		try {
-			$room = $this->manager->getRoomByToken($roomToken, $this->user->getUID());
+			$room = $this->manager->getRoomByToken($roomToken, $this->userId);
 		} catch (RoomNotFoundException $e) {
-			$this->logger->debug('Room not found: ' . $e->getMessage());
+			$this->logger->warning('Room not found: ' . $e->getMessage());
 			return;
 		}
 
 		// get room type and if it is not Room Object Event, return
-		if ($room->getType() !== Room::OBJECT_TYPE_EVENT) {
+		if ($room->getObjectType() !== Room::OBJECT_TYPE_EVENT) {
 			$this->logger->debug("Room $roomToken not an event room");
 			return;
 		}
 
-		$rrule = $vevent->RRULE->getValue();
-		// We don't handle rooms with RRULEs
+		$rrule = $vevent->RRULE;
+		// We don't handle events with RRULEs
 		if (!empty($rrule)) {
-//			$this->roomService->resetObject($room);
-			$this->logger->debug("Room $roomToken calendar event contains an RRRULE, converting to regular room");
+			$this->roomService->setObject($room);
+			$this->logger->debug("Room $roomToken calendar event contains an RRULE, converting to regular room");
 			return;
 		}
 
+		/** @var DateTime $start */
 		$start = $vevent->DTSTART;
+		if ($start instanceof Date) {
+			// Full day events don't have a timezone so we need to get the user's timezone
+			// If we don't have that we can use the default server timezone
+			$timezone = $this->timezoneService->getUserTimezone($this->userId) ?? $this->timezoneService->getDefaultTimezone();
+			try {
+				$start = $start->getDateTime(new \DateTimeZone($timezone))->getTimestamp();
+			} catch (\DateInvalidTimeZoneException $e) {
+				$this->logger->warning("Invalid date time zone for user for room $roomToken, continuing with UTC+0: " . $e->getMessage());
+				// Since this is for a full day event, we set a timestamp with UTC+0 instead
+				$start = $start->getDateTime(new \DateTimeZone('UTC'))->getTimestamp();
+			}
+		} elseif ($start instanceof DateTime) {
+			// This already includes a TZ in the object
+			$start = $start->getDateTime()->getTimestamp();
+		}
 
+		$this->roomService->setObject($room, (string)$start, Room::OBJECT_TYPE_EVENT);
 
-		// Get starttime
-		// update object id for room so it's the start timestamp
 	}
 }

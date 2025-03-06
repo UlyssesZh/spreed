@@ -26,6 +26,7 @@ use OCA\Talk\Events\RoomDeletedEvent;
 use OCA\Talk\Events\RoomModifiedEvent;
 use OCA\Talk\Events\RoomPasswordVerifyEvent;
 use OCA\Talk\Events\RoomSyncedEvent;
+use OCA\Talk\Exceptions\InvalidRoomException;
 use OCA\Talk\Exceptions\RoomNotFoundException;
 use OCA\Talk\Exceptions\RoomProperty\AvatarException;
 use OCA\Talk\Exceptions\RoomProperty\BreakoutRoomModeException;
@@ -1440,5 +1441,20 @@ class RoomService {
 
 		$room->setObjectId('');
 		$room->setObjectType('');
+	}
+
+	public function setObject(Room $room, string $objectId = '', string $objectType = ''): void {
+		if (($objectId !== '' && $objectType === '') || ($objectId === '' && $objectType !== '')) {
+			throw new InvalidRoomException('Object ID and Object Type must both be empty or both have values');
+		}
+		$update = $this->db->getQueryBuilder();
+		$update->update('talk_rooms')
+			->set('object_id', $update->createNamedParameter($objectId, IQueryBuilder::PARAM_STR))
+			->set('object_type', $update->createNamedParameter($objectType, IQueryBuilder::PARAM_STR))
+			->where($update->expr()->eq('id', $update->createNamedParameter($room->getId(), IQueryBuilder::PARAM_INT)));
+		$update->executeStatement();
+
+		$room->setObjectId($objectId);
+		$room->setObjectType($objectType);
 	}
 }
