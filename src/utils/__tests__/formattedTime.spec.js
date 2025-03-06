@@ -85,6 +85,14 @@ describe('formatDateTime', () => {
 		['lll', 'Feb 15, 2025, 8:30 PM'], // 'MMM D YYYY LT'
 		['LLLL', 'Saturday, February 15, 2025 at 8:30 PM'], // 'dddd, MMMM Do YYYY LT'
 		['llll', 'Sat, Feb 15, 2025, 8:30 PM'], // 'ddd, MMM D YYYY L'
+		['Lo', '02/15'], // 'MM/DD'
+		['lo', '2/15'], // 'M/D'
+		['LLo', 'February 15'], // 'MMMM Do'
+		['llo', 'Feb 15'], // 'MMM D'
+		['LLLo', 'February 15 at 8:30 PM'], // 'MMMM Do LT'
+		['lllo', 'Feb 15, 8:30 PM'], // 'MMM D LT'
+		['LLLLo', 'Saturday, February 15 at 8:30 PM'], // 'dddd, MMMM Do LT'
+		['llllo', 'Sat, Feb 15, 8:30 PM'], // 'ddd, MMM D L'
 		['ll LTS', 'Feb 15, 2025 8:30:00 PM'], // 'MMM D YYYY LTS'
 		['ddd LT', 'Sat 8:30 PM'], // 'ddd LT'
 		['DD-MM-YYYY HH:mm:ss', '15-02-2025 20:30:00'], // as passed
@@ -101,6 +109,7 @@ describe('formatRelativeTime', () => {
 	const TIME = new Date('2025-02-15T20:30:00Z')
 
 	const RELATIVE_TEST_CASES = [
+		['-365', new Date('2024-02-15T20:30:00Z'), 'February 15, 2024', 'February 15, 2024'],
 		['-7', new Date('2025-02-08T20:30:00Z'), 'February 8, 2025', 'February 8, 2025'],
 		['-6', new Date('2025-02-09T20:30:00Z'), '6 days ago, February 9, 2025', 'Sunday, 8:30 PM'],
 		['-5', new Date('2025-02-10T20:30:00Z'), '5 days ago, February 10, 2025', 'Monday, 8:30 PM'],
@@ -119,7 +128,7 @@ describe('formatRelativeTime', () => {
 	]
 
 	it.each(RELATIVE_TEST_CASES)('should return datetime with specified format %s days from the base', (diffDays, time, numericOutput, weekdayOutput) => {
-		const numericResult = formatRelativeTime(+time, { from: TIME, weekPrefix: 'numeric', weekSuffix: 'LL' })
+		const numericResult = formatRelativeTime(+time, { from: TIME, weekPrefix: 'numeric', weekSuffix: 'LL', omitSameYear: true })
 		const weekdayResult = formatRelativeTime(+time, { from: TIME, weekPrefix: 'weekday', weekSuffix: 'LT' })
 		expect(numericResult).toBe(numericOutput)
 		expect(weekdayResult).toBe(weekdayOutput)

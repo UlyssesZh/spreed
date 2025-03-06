@@ -23,6 +23,15 @@ const absoluteTimeFormat = {
 	dddd: new Intl.DateTimeFormat(locale, { weekday: 'long' }), // 'Saturday'
 	MMM: new Intl.DateTimeFormat(locale, { month: 'short' }), // 'Feb'
 	MMMM: new Intl.DateTimeFormat(locale, { month: 'long' }), // 'February'
+	// Locale formatters with omitted year
+	Lo: new Intl.DateTimeFormat(locale, { month: '2-digit', day: '2-digit' }), // '02/15/2025'
+	lo: new Intl.DateTimeFormat(locale, { month: 'numeric', day: 'numeric' }), // '2/15/2025'
+	LLo: new Intl.DateTimeFormat(locale, { month: 'long', day: 'numeric' }), // 'February 15, 2025'
+	llo: new Intl.DateTimeFormat(locale, { month: 'short', day: 'numeric' }), // 'Feb 15, 2025'
+	LLLo: new Intl.DateTimeFormat(locale, { month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric' }), // 'February 15, 2025 at 8:30 PM'
+	lllo: new Intl.DateTimeFormat(locale, { month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric' }), // 'Feb 15, 2025, 8:30 PM'
+	LLLLo: new Intl.DateTimeFormat(locale, { weekday: 'long', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric' }), // 'Saturday, February 15, 2025 at 8:30 PM'
+	llllo: new Intl.DateTimeFormat(locale, { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric' }), // 'Sat, Feb 15, 2025, 8:30 PM'
 } as const
 const availableFormats = Object.keys(absoluteTimeFormat) as Array<keyof typeof absoluteTimeFormat>
 
@@ -122,6 +131,7 @@ type FormatRelativeOptions = {
 	weekPrefix?: 'weekday' | 'numeric',
 	weekSuffix?: keyof typeof absoluteTimeFormat,
 	suffix?: keyof typeof absoluteTimeFormat,
+	omitSameYear?: boolean,
 }
 
 /**
@@ -134,9 +144,16 @@ type FormatRelativeOptions = {
  * @param weekPrefix appearance of prefix: 'weekday' - Monday | 'numeric' - in 3 days (default)
  * @param weekSuffix appearance of suffix for timestamps < 7 days (LT by default)
  * @param suffix appearance of suffix for timestamps >= 7 days (LL by default)
+ * @param omitSameYear omit year part if date to count from has the same year
  */
-function formatRelativeTime(time: number, { from = Date.now(), weekPrefix = 'numeric', weekSuffix = 'LT', suffix = 'LL' }: FormatRelativeOptions) {
+function formatRelativeTime(time: number, { from = Date.now(), weekPrefix = 'numeric', weekSuffix = 'LT', suffix = 'LL', omitSameYear = false }: FormatRelativeOptions = {}) {
 	const daysDiff = Math.floor((new Date(time).setHours(0, 0, 0, 0) - new Date(from).setHours(0, 0, 0, 0)) / ONE_DAY_IN_MS)
+
+	// if omitSameYear is passed, use another Intl formatter
+	if (omitSameYear && new Date(time).getFullYear() === new Date(from).getFullYear()) {
+		weekSuffix += weekSuffix.match(/\b(L{1,4}|l{1,4})\b/g) ? 'o' : ''
+		suffix += suffix.match(/\b(L{1,4}|l{1,4})\b/g) ? 'o' : ''
+	}
 
 	switch (daysDiff) {
 		case -1:

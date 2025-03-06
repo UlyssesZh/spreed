@@ -408,7 +408,7 @@ export default {
 					}
 
 					if (!this.dateSeparatorLabels[dateTimestamp]) {
-						this.$set(this.dateSeparatorLabels, dateTimestamp, formatRelativeTime(dateTimestamp * 1000, { weekPrefix: 'numeric', weekSuffix: 'LL' }))
+						this.$set(this.dateSeparatorLabels, dateTimestamp, formatRelativeTime(dateTimestamp * 1000, { weekPrefix: 'numeric', weekSuffix: 'LL', omitSameYear: true }))
 					}
 
 					if (!groupsByDate[dateTimestamp]) {
@@ -1227,7 +1227,7 @@ export default {
 				this.refreshReadMarkerPosition()
 				// Regenerate relative date separators
 				Object.keys(this.dateSeparatorLabels).forEach(dateTimestamp => {
-					this.$set(this.dateSeparatorLabels, dateTimestamp, formatRelativeTime(dateTimestamp * 1000, { weekPrefix: 'numeric', weekSuffix: 'LL' }))
+					this.$set(this.dateSeparatorLabels, dateTimestamp, formatRelativeTime(dateTimestamp * 1000, { weekPrefix: 'numeric', weekSuffix: 'LL', omitSameYear: true }))
 				})
 			}, 2)
 		},
