@@ -207,7 +207,20 @@ export default {
 				return
 			}
 
-			await shareFile(filePath, this.token, '', '')
+			try {
+				await shareFile({ path: filePath, shareWith: this.token })
+			} catch (error) {
+				console.error('Error while sharing file: ', error)
+				if (error?.response?.status === 403) {
+					showError(t('spreed', 'You are not allowed to share files'))
+				} else if (error?.response?.data?.ocs?.meta?.message) {
+					showError(error.response.data.ocs.meta.message)
+					this.newFileError = error.response.data.ocs.meta.message
+				} else {
+					showError(t('spreed', 'Error while sharing file'))
+				}
+			}
+
 			this.loading = false
 
 			this.openViewer(filePath, [fileData], fileData)
